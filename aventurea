@@ -38,8 +38,10 @@ $(CACHE)/%:
 
 ## TODO: en el debian/control poner de dependencia wget, fuse-emulator-gtk , spectrum-roms
 
-test:
-	fuse $(GAME).TAP
+all: $(GAME).TAP
+
+test: $(GAME).TAP
+	fuse $<
 
 clean:
 	$(RM) $(GAME).{json,DDB,TAP}
