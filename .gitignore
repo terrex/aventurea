@@ -1,0 +1,5 @@
+config.mk
+*.DSF
+*.DDB
+*.json
+*.TAP

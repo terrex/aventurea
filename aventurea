@@ -1,0 +1,45 @@
+#!/usr/bin/make -f
+
+-include config.mk
+
+SHELL := /bin/bash
+
+.ONESHELL:
+
+LANG ?= ES
+GAME ?= TEST
+
+ifeq ($(LANG),ES)
+INTERPRETER ?= ASSETS/ZX/ZXSPECTRUM/DS48IS.BIN
+else
+LANG := EN
+INTERPRETER ?= ASSETS/ZX/ZXSPECTRUM/DS48IE.BIN
+endif
+
+CACHE ?= $(HOME)/.local/cache/aventurea
+
+.DEFAULT_GOAL := $(GAME).TAP
+
+$(GAME).DSF: /usr/share/doc/drc/examples/BLANK_$(LANG).DSF
+	test -e $@ || cp $< $@
+
+$(GAME).json: $(GAME).DSF
+	drf zx esxdos $< tape48
+
+$(GAME).DDB: $(GAME).json
+	drb zx esxdos $(LANG) $< $@
+
+$(GAME).TAP: $(GAME).DDB $(CACHE)/$(INTERPRETER) $(CACHE)/ASSETS/CHARSET/AD8x6.CHR
+	daadmaker $@ $(CACHE)/$(INTERPRETER) $(GAME).DDB $(CACHE)/ASSETS/CHARSET/AD8x6.CHR
+
+$(CACHE)/%:
+	mkdir -p $(shell dirname $@)
+	wget -q -O $@ https://github.com/Utodev/DAAD-Ready/raw/refs/heads/master/$*
+
+## TODO: en el debian/control poner de dependencia wget, fuse-emulator-gtk , spectrum-roms
+
+test:
+	fuse $(GAME).TAP
+
+clean:
+	$(RM) $(GAME).{json,DDB,TAP}
